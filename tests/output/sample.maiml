@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<maiml xmlns="http://www.maiml.org/schemas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ex="http://example.org/maiml-domain-test" xmlns:KYL="http://example.org/kyl-instrument-properties" xmlns:ISO18115-3="urn:iso:std:iso:18115:-3" xmlns:lifecycle="http://www.xes-standard.org/lifecycle.xesext#" xsi:type="maimlRootType" version="1.0">
+  <document id="doc1">
+    <uuid>3e67f2a9-1dcb-43cb-b990-b1a83efa6b81</uuid>
+    <property key="ex:sample-decimal" xsi:type="decimalType" formatString="0.00" units="mm">
+      <value>1.50</value>
+    </property>
+    <property key="ex:sample-string" xsi:type="stringType">
+      <value>hello maiml-domain</value>
+    </property>
+    <creator id="creator1">
+      <uuid>985a8319-8772-42e1-940a-2823871a07b6</uuid>
+      <vendorRef id="vref1" ref="vendor1"/>
+      <instrumentRef id="iref1" ref="instrument1"/>
+    </creator>
+    <vendor id="vendor1">
+      <uuid>37bdbaa8-cee8-4513-aa13-d104b8e8b7ee</uuid>
+    </vendor>
+    <owner id="owner1">
+      <uuid>1ea32f58-045d-4fc7-9256-0a680f8225ae</uuid>
+    </owner>
+    <instrument id="instrument1">
+      <uuid>93383650-9c74-4ca3-8f44-3334f2180968</uuid>
+    </instrument>
+    <date>2026-09-03T08:44:58.123999+00:00</date>
+  </document>
+  <protocol id="protocol1">
+    <uuid>321bb98d-6344-4266-aa0b-f3c057360520</uuid>
+    <method id="method1">
+      <uuid>fc8ceada-cda3-4578-9c49-0e924a1bb5ca</uuid>
+      <pnml id="pnml1">
+        <uuid>73d9cbac-0509-4946-8890-5763d384bd43</uuid>
+        <place id="place1"/>
+        <transition id="trans1"/>
+        <arc id="arc1" source="place1" target="trans1"/>
+      </pnml>
+      <program id="program1">
+        <uuid>dd092d31-c638-4242-ba09-d1a4f98b0c2e</uuid>
+        <instruction id="instr1">
+          <uuid>ecc26eae-c6fc-44f4-be27-aa751f189d08</uuid>
+          <transitionRef id="tref1" ref="trans1"/>
+        </instruction>
+      </program>
+    </method>
+    <materialTemplate id="material_template1">
+      <uuid>775a7e1d-54c0-4529-90a4-67648d335bc9</uuid>
+      <property key="KYL:Cantilever" xsi:type="stringType">
+        <property key="KYL:ResonanceFrequency" xsi:type="floatType" units="kHz"/>
+        <property key="KYL:ForceConstant" xsi:type="floatType" units="N/m"/>
+      </property>
+      <content key="ISO18115-3:Wavenumber" axis="Wavenumber" size="15" xsi:type="contentDoubleListType" formatString="0.0000" units="cm-1" scaleFactor="1">
+        <value>3143.75 3142.15 3140.55 3138.95 3137.34 3135.74 3134.14 3132.53 3130.93 3129.33 3127.72 3126.12 3124.51 3122.91 3121.3</value>
+      </content>
+      <placeRef id="pref1" ref="place1"/>
+    </materialTemplate>
+  </protocol>
+  <data id="data1">
+    <uuid>4fe535af-d63d-4823-b6c7-4614af974666</uuid>
+    <results id="results1">
+      <uuid>7ce4491b-66fe-4129-aff2-7c4f71a1b65c</uuid>
+      <material id="material1" ref="material_template1">
+        <uuid>b4660af7-8956-4526-8161-452ae1ab74e2</uuid>
+        <property key="KYL:Cantilever" xsi:type="stringType">
+          <property key="KYL:ResonanceFrequency" xsi:type="floatType" units="kHz"/>
+          <property key="KYL:ForceConstant" xsi:type="floatType" units="N/m"/>
+        </property>
+        <content key="ISO18115-3:Wavenumber" axis="Wavenumber" size="15" xsi:type="contentDoubleListType" formatString="0.0000" units="cm-1" scaleFactor="1">
+          <value>3143.75 3142.15 3140.55 3138.95 3137.34 3135.74 3134.14 3132.53 3130.93 3129.33 3127.72 3126.12 3124.51 3122.91 3121.3</value>
+        </content>
+      </material>
+    </results>
+  </data>
+  <eventLog id="eventlog1">
+    <uuid>53a2f361-563e-43f2-8dd0-034e310152a6</uuid>
+    <log id="log1" ref="method1">
+      <uuid>0104f97b-7085-4077-a00c-9fb7bb75c688</uuid>
+      <trace id="trace1" ref="program1">
+        <uuid>244b824b-e56f-436e-b2e7-2df9d8efd4ce</uuid>
+        <event id="event1" ref="instr1">
+          <uuid>d4db4a27-7a99-4444-bd9c-c0957043d2b8</uuid>
+          <property key="lifecycle:transition" xsi:type="stringType">
+            <value>complete</value>
+          </property>
+        </event>
+      </trace>
+    </log>
+  </eventLog>
+</maiml>
