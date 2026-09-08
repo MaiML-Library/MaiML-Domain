@@ -94,7 +94,7 @@ jobs:
               NEEDS_RELEASE=true
               echo "直前のタグ $PREV_TAG から x または y が変わっています ($PREV -> $CURRENT) -> GitHub Release の作成を必須とします。"
             else
-              echo "直前のタグ $PREV_TAG から z のみの変更では一旦失敗するは剘想、フローかぉる仃朇敗は変更する。"
+              echo "直前のタグ $PREV_TAG から z のみの変更です ($PREV -> $CURRENT) -> GitHub Release の作成は不要です(タグのみでOK)。"
             fi
           fi
 
