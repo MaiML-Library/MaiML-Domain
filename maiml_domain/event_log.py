@@ -16,7 +16,7 @@ from __future__ import annotations
 from abc import ABC
 from typing import List, Optional
 
-from .core import HasIdAttributeType, GlobalObjectContent
+from .core import HasIdAttributeType, GlobalObjectContent, _StrictAttributesMixin
 from .property import PropertyBaseType
 from .ref_types import CreatorRefType, OwnerRefType, ResultsRefType
 
@@ -25,7 +25,7 @@ from .ref_types import CreatorRefType, OwnerRefType, ResultsRefType
 # AttributableType  (abstract)
 # ---------------------------------------------------------------------------
 
-class AttributableType(ABC):
+class AttributableType(_StrictAttributesMixin, ABC):
     """
     Abstract base that carries a list of propertyBaseType elements.
     Used by GlobalsType.
@@ -39,7 +39,7 @@ class AttributableType(ABC):
 # ExtensionType
 # ---------------------------------------------------------------------------
 
-class ExtensionType:
+class ExtensionType(_StrictAttributesMixin):
     """
     XES extension declaration: name + prefix + uri (all required).
     """
@@ -82,7 +82,7 @@ class GlobalsType(AttributableType):
 # ClassifierType
 # ---------------------------------------------------------------------------
 
-class ClassifierType:
+class ClassifierType(_StrictAttributesMixin):
     """
     XES classifier: name + scope + keys (all required).
     """

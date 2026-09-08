@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from .core import HasIdAttributeType, GlobalObjectContent, HashType
+from .core import HasIdAttributeType, GlobalObjectContent, HashType, _StrictAttributesMixin
 from .simple_types import Uuid
 from .ref_types import VendorRefType, InstrumentRefType
 
@@ -18,7 +18,7 @@ from .ref_types import VendorRefType, InstrumentRefType
 # ChainType  (recursive)
 # ---------------------------------------------------------------------------
 
-class ChainType:
+class ChainType(_StrictAttributesMixin):
     """
     Integrity chain: uuid + hash + optional nested chains.
     Optional 'key' attribute.
@@ -44,7 +44,7 @@ class ChainType:
 # ParentType  (recursive)
 # ---------------------------------------------------------------------------
 
-class ParentType:
+class ParentType(_StrictAttributesMixin):
     """
     Parent document reference: uuid + hash + optional nested parents.
     Optional 'key' attribute.

@@ -21,14 +21,14 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, List, Optional
 
-from .core import EncryptionType
+from .core import EncryptionType, _StrictAttributesMixin
 
 
 # ---------------------------------------------------------------------------
 # Abstract bases
 # ---------------------------------------------------------------------------
 
-class UncertaintyBaseType(ABC):
+class UncertaintyBaseType(_StrictAttributesMixin, ABC):
     """
     Root abstract type for both property and content.
     Carries a required 'key' attribute (xs:QName stored as str) and the

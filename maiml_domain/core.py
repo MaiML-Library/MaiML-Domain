@@ -6,10 +6,89 @@ Defines abstract base types and shared structural types used throughout MaiML.
 """
 
 from __future__ import annotations
+import functools
+import inspect
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields, is_dataclass
 from typing import List, Optional
 from .simple_types import Uuid
+
+
+# ---------------------------------------------------------------------------
+# _StrictAttributesMixin
+# ---------------------------------------------------------------------------
+
+class _StrictAttributesMixin:
+    """Rejects assignment to any attribute name a MaiML-Domain class does
+    not itself declare, instead of silently accepting it and then silently
+    dropping it on the floor.
+
+    maiml_domain models the XSD 1:1, and SDKs built on it (e.g. PyMaiML)
+    only ever read the fields each class declares. Before this mixin,
+    something like `results.insertions = [...]` (the correct location is
+    `results.content.insertions`) succeeded without error and was simply
+    never read by anything -- the value silently vanished on the next
+    dump, with no exception anywhere to point at the mistake.
+
+    Declared attribute names are discovered automatically, per class, with
+    no per-class bookkeeping required here:
+      - for a @dataclass (e.g. HashType, GlobalObjectContent), from
+        dataclasses.fields(cls);
+      - otherwise, from inspect.signature(cls.__init__)'s parameter names.
+        Every non-dataclass class in this package sets self.<param_name> =
+        <param_name> (verbatim) for each of its own __init__ parameters --
+        this mixin relies on that convention holding; a class that breaks
+        it would need to override _declared_attr_names() itself.
+    Leading-underscore names (e.g. HasIdAttributeType's private `_id`,
+    backing the public `id` property) are always allowed, since those are
+    this package's own implementation detail, not something a caller could
+    plausibly mean to set.
+    """
+
+    __slots__ = ()
+
+    def __setattr__(self, name: str, value) -> None:
+        if name.startswith("_") or name in type(self)._declared_attr_names():
+            object.__setattr__(self, name, value)
+            return
+        raise AttributeError(
+            f"{type(self).__name__!r} object has no attribute {name!r}. "
+            "maiml_domain rejects attribute names its classes don't "
+            "declare rather than silently accepting and then silently "
+            "ignoring them -- a common mistake is setting a field that "
+            "actually belongs on .content (e.g. 'insertions', "
+            "'properties', 'name', 'description') directly on the outer "
+            "object instead."
+        )
+
+    @classmethod
+    @functools.lru_cache(maxsize=None)
+    def _declared_attr_names(cls) -> frozenset:
+        if is_dataclass(cls):
+            return frozenset(f.name for f in fields(cls))
+
+        # Union every __init__ actually defined anywhere in the MRO, not
+        # just cls's own -- a subclass can deliberately narrow its own
+        # __init__ signature (e.g. PropertyListType has no 'values'
+        # parameter of its own) while still calling super().__init__(...)
+        # with a hardcoded value, which legitimately sets an attribute
+        # under the PARENT class's parameter name. Checking only cls's own
+        # __init__ would reject that attribute as if it were a typo.
+        names = set()
+        for klass in cls.__mro__:
+            init = klass.__dict__.get("__init__")
+            if init is None:
+                continue
+            params = inspect.signature(init).parameters
+            names.update(
+                name for name, param in params.items()
+                if name != "self"
+                and param.kind not in (
+                    inspect.Parameter.VAR_POSITIONAL,
+                    inspect.Parameter.VAR_KEYWORD,
+                )
+            )
+        return frozenset(names)
 
 
 # ---------------------------------------------------------------------------
@@ -17,7 +96,7 @@ from .simple_types import Uuid
 # ---------------------------------------------------------------------------
 
 @dataclass
-class HashType:
+class HashType(_StrictAttributesMixin):
     """
     Binary hash value with an optional hashing method attribute.
     xs:base64Binary content + method attribute.
@@ -38,7 +117,7 @@ class HashType:
 # ---------------------------------------------------------------------------
 
 @dataclass
-class InsertionType:
+class InsertionType(_StrictAttributesMixin):
     """
     Reference to an external resource by URI + hash, with optional UUID/format.
     """
@@ -57,7 +136,7 @@ class InsertionType:
 # ---------------------------------------------------------------------------
 
 @dataclass
-class EncryptionType:
+class EncryptionType(_StrictAttributesMixin):
     """
     Encrypted-content branch of globalObjectContentGroup, and of every
     property*/content* type's own xs:choice (encryptionGroup in
@@ -92,7 +171,7 @@ class EncryptionType:
 # Abstract base: HasIdAttributeType
 # ---------------------------------------------------------------------------
 
-class HasIdAttributeType(ABC):
+class HasIdAttributeType(_StrictAttributesMixin, ABC):
     """
     Abstract base for any element that carries a required xs:ID attribute.
     All major MaiML objects (document, protocol, data, …) inherit from this.
@@ -116,7 +195,7 @@ class HasIdAttributeType(ABC):
 # ---------------------------------------------------------------------------
 
 @dataclass
-class GlobalObjectContent:
+class GlobalObjectContent(_StrictAttributesMixin):
     """
     Mixin that provides the content carried by every 'global object':
       uuid, name, description, annotation, insertions, properties, contents
@@ -228,6 +307,7 @@ class TripleObjectType(SimpleObjectType):
 
 
 __all__ = [
+    "_StrictAttributesMixin",
     "HashType",
     "InsertionType",
     "EncryptionType",

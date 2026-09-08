@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "maiml-domain"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python domain model for MaiML (JIS K 0200 / MaiML-Schema-1_0) -- one class per XSD-defined type, the shared foundation MaiML-Library language SDKs build on."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -26,6 +26,9 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries",
 ]
+
+[project.optional-dependencies]
+dev = ["pytest"]
 
 [project.urls]
 Homepage = "https://github.com/MaiML-Library/MaiML-Domain"

@@ -11,13 +11,14 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from .core import _StrictAttributesMixin
 from .document import DocumentType
 from .protocol import ProtocolType
 from .data import DataType
 from .event_log import EventLogType
 
 
-class RootObjectType(ABC):
+class RootObjectType(_StrictAttributesMixin, ABC):
     """
     Abstract root of a MaiML file.
     version attribute is fixed to "1.0".

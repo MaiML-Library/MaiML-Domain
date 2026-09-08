@@ -30,6 +30,10 @@ SemVerに従い、破壊的変更は `x`(メジャー)、機能追加は `y`(マ
 
 ## [Unreleased]
 
+(このリリース以降の変更をここに追記していきます)
+
+## [0.2.0] - 2026-09-08
+
 ### Added
 - `EncryptionType`(`maiml_domain.core`)を追加し、`globalObjectContentGroup` および
   全 property/content 型が持つ `encryptionGroup`(暗号化コンテンツの選択肢)をサポート。
@@ -53,6 +57,27 @@ SemVerに従い、破壊的変更は `x`(メジャー)、機能追加は `y`(マ
   未使用 import(`NewType`)を削除。
 - リポジトリ内の `.DS_Store` / `__pycache__` / 未完成の DDD スキャフォールド
   (`maiml_domain/maiml/` 以下)を整理。
+
+### Fixed
+- `maiml_domain`の全クラス(`@dataclass`のもの・独自`__init__`のものいずれも)
+  へ`_StrictAttributesMixin`(`maiml_domain.core`)を追加。未宣言の属性名への
+  代入を`AttributeError`で拒否するようになった(**破壊的変更**:
+  従来は`results.insertions = [...]`のような、本来`results.content.insertions`
+  であるべき代入も無検証で成功し、書き出し側が読まない属性名のため値が
+  静かに失われていた。外部レビュー所見10)。宣言済み属性名は
+  `@dataclass`なら`dataclasses.fields(cls)`、それ以外は`cls.__mro__`上の
+  全`__init__`のパラメータ名の和集合(サブクラスが独自の`__init__`で
+  親クラスより狭いシグネチャを持ちつつ`super().__init__(...)`経由で
+  親のパラメータ名の属性を設定するケース(例:`PropertyListType`は
+  自身の`__init__`に`values`引数を持たないが、`_PropertyListBase.__init__`
+  経由で`self.values`を設定する)を誤って弾かないよう、`cls.__init__`単体
+  ではなくMRO全体を見る)から自動的に判定するため、既存クラスへの
+  個別の追記は不要。アンダースコア始まりの属性名(`HasIdAttributeType`の
+  `_id`など、内部実装用)は常に許可する。`copy.deepcopy()`は
+  `__setattr__`を経由しない標準の再構築経路のため影響を受けないことを
+  確認済み(回帰テストあり)。回帰防止テストを`tests/test_strict_attributes.py`
+  に11件追加(このリポジトリ初のpytestテストスイート。開発用依存に
+  `pytest`を追加)。
 
 ## [0.1.0] - 初期バージョン
 
