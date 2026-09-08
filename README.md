@@ -1,5 +1,7 @@
 # MaiML-Domain
 
+[![Tests](https://github.com/MaiML-Library/MaiML-Domain/actions/workflows/test.yml/badge.svg)](https://github.com/MaiML-Library/MaiML-Domain/actions/workflows/test.yml)
+
 MaiML(JIS K 0200 / MaiML-Schema-1_0)の XSD 定義に対応した Python ドメインモデルライブラリです。
 [MaiML-Library](https://github.com/MaiML-Library) organization におけるSDK
 ([PyMaiML](https://github.com/MaiML-Library/PyMaiML) など)や周辺ツールが共通して利用する、
