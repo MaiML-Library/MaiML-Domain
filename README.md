@@ -54,8 +54,8 @@ document = DocumentType(
 
 MaiML-Library organization は次のような階層構造を基本方針としています([`.github`](https://github.com/MaiML-Library/.github) の組織方針を参照)。
 
-- **MaiML-Domain**(本リポジトリ) -- 共通データモデル(基盤)
-- 言語別 SDK(例: [PyMaiML](https://github.com/MaiML-Library/PyMaiML)) -- 本リポジトリを利用して構築
+- **MaiML-Domain**(本リポジトリ) -- 共通データモデル(基盤)。Pythonでの実装
+- Python向け SDK(例: [PyMaiML](https://github.com/MaiML-Library/PyMaiML)) -- 本リポジトリ(`maiml_domain`)を直接利用して構築。他言語向けSDKを追加する場合、本リポジトリはPython実装のため直接は共有できず、その言語向けに本リポジトリ相当のドメインモデルを別途実装することになる
 - API・ツール群 -- SDK / ドメイン層に依存
 
 ## バリデーションの範囲
