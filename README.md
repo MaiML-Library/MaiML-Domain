@@ -1,7 +1,7 @@
 # MaiML-Domain
 
 MaiML(JIS K 0200 / MaiML-Schema-1_0)の XSD 定義に対応した Python ドメインモデルライブラリです。
-[MaiML-Library](https://github.com/MaiML-Library) organization における各言語 SDK
+[MaiML-Library](https://github.com/MaiML-Library) organization におけるSDK
 ([PyMaiML](https://github.com/MaiML-Library/PyMaiML) など)や周辺ツールが共通して利用する、
 基盤となる共通データモデルです。
 
