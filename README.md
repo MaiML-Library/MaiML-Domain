@@ -56,6 +56,21 @@ MaiML-Library organization は次のような階層構造を基本方針とし�
 - 言語別 SDK(例: [PyMaiML](https://github.com/MaiML-Library/PyMaiML)) -- 本リポジトリを利用して構築
 - API・ツール群 -- SDK / ドメイン層に依存
 
+## バリデーションの範囲
+
+本リポジトリは「純粋なデータモデル」を掲げていますが、完全に無検証というわけではありません。
+**XSD単体(1つのcomplexType定義)を見るだけで機械的に判断できる制約**
+(`minOccurs`/`maxOccurs`、`xs:choice`の排他性、required属性、`simpleType`の字句上の制約など)は
+各クラスのコンストラクタで検証し、違反時には`ValueError`/`TypeError`を送出します
+(例: `HasIdAttributeType.id`が空文字なら拒否、`GlobalObjectContent`で`encryption`と
+平文フィールドを同時に指定すると拒否、など)。一方、**複数要素・複数セクションをまたいで
+初めて判断できる検証**(`id`/`ref`の整合性、`ref`参照先の型チェック、イベントログの
+`lifecycle:transition="complete"`必須化などJIS / MaiML AI Common Specificationの業務ルール)は、
+あえて本リポジトリの責務外としています。これらはSDK層
+([PyMaiML](https://github.com/MaiML-Library/PyMaiML)の`pymaiml.validation`)が担います。
+新しい検証ロジックをどちらに実装すべきか迷ったら、この基準(1つのcomplexType定義だけで
+判定できるか否か)に照らして判断してください。
+
 ## コントリビューション
 
 仕様に関わる変更は Issue / Pull Request で議論のうえ、[`CHANGELOG.md`](./CHANGELOG.md) に記録してください。
