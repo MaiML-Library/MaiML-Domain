@@ -76,7 +76,9 @@ MaiML-Library organization は次のような階層構造を基本方針とし�
 ## コントリビューション
 
 仕様に関わる変更は Issue / Pull Request で議論のうえ、[`CHANGELOG.md`](./CHANGELOG.md) に記録してください。
-バグ報告・ドキュメント改善なども歓迎します。
+バグ報告・ドキュメント改善なども歓迎します。詳しい手順(XSD更新時の対応・
+`_StrictAttributesMixin`の規約・バリデーションの範囲など)は
+[`CONTRIBUTING.md`](./CONTRIBUTING.md) を参照してください。
 
 ## ライセンス
 
