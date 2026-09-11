@@ -98,11 +98,12 @@ XSDファイル自体を同梱していません(XMLの読み書き・スキー�
 - 署名の生成・検証は、外部の署名ツールを使って、シリアライズ済みの
   バイト列(例: PyMaiMLの`dumps()`/`dump()`が出力したもの)に対して
   直接行ってください。
-- **署名済みMaiMLファイルを保存する際は、XMLの再整形(pretty print)、
-  コメント削除、不要な空白削除など、署名対象XMLの正準化結果を変化させる
-  処理を行わないこと。** `signature`フィールドを生の文字列のまま保持する
+- **署名済みMaiMLファイルを保存する際は、XMLの再整形(pretty print)・
+  コメント削除・不要な空白削除だけでなく、改行コード(CRLF/LF)の変換・
+  属性の並び替えなど、署名対象XMLの正準化(C14N)結果を変化させうる処理を
+  一切行わないこと。** `signature`フィールドを生の文字列のまま保持する
   (構造化しない)本リポジトリの設計は、この原則を壊さないための前提でも
-  あります(詳細は[PyMaiMLのCONTRIBUTING.md](https://github.com/MaiML-Library/PyMaiML/blob/main/CONTRIBUTING.md)の
+  あります(詳細・具体例は[PyMaiMLのCONTRIBUTING.md](https://github.com/MaiML-Library/PyMaiML/blob/main/CONTRIBUTING.md)の
   同項を参照)。
 - 将来的に構造化した`Signature`型のサポートを検討する場合も、上記の
   「バリデーションの範囲」の原則(単体のcomplexTypeとして判断できる

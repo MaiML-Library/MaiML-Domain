@@ -48,6 +48,11 @@ SemVerに従い、破壊的変更は `x`(メジャー)、機能追加は `y`(マ
   正準化結果を変化させる処理を行ってはならないというルールです
   ([PyMaiML](https://github.com/MaiML-Library/PyMaiML)のCONTRIBUTING.mdに
   追記した同ルールへのポインタです)。コード変更はありません。
+- **署名済みMaiMLの保存ルールを、MaiML-Signer(外部の署名ツール)の
+  README記載内容を踏まえて拡充しました。** 改行コード(CRLF/LF)の変換や
+  属性の並び替えも正準化結果に影響することを`CONTRIBUTING.md`に追記
+  しています(詳細はPyMaiML側のCONTRIBUTING.mdを参照)。コード変更は
+  ありません。
 
 ## [0.2.0] - 2026-09-08
 
