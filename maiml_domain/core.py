@@ -11,7 +11,7 @@ import inspect
 from abc import ABC
 from dataclasses import dataclass, field, fields, is_dataclass
 from typing import List, Optional
-from .simple_types import Uuid
+from .simple_types import Uuid, NCNAME_PATTERN
 
 
 # ---------------------------------------------------------------------------
@@ -180,6 +180,11 @@ class HasIdAttributeType(_StrictAttributesMixin, ABC):
     def __init__(self, id: str):
         if not id:
             raise ValueError("id must not be empty")
+        if not NCNAME_PATTERN.match(id):
+            raise ValueError(
+                f"{type(self).__name__}.id is not a valid NCName (required by "
+                f"xs:ID): {id!r}"
+            )
         self._id: str = id
 
     @property

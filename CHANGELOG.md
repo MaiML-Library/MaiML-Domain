@@ -117,6 +117,32 @@ SemVerに従い、破壊的変更は `x`(メジャー)、機能追加は `y`(マ
   留まっている旨を明記し、対応範囲を広げる場合は別Issueとして切り出す
   ことを推奨する一文を追加した。
 
+- **`MaiML_Domain_XSD_builtin_validation_policy.md`に基づき、
+  MaiML-Domain/PyMaiMLの検証責務境界を明文化し、`xs:ID`/`xs:IDREF`/
+  `xs:QName`/`xs:language`のローカルな字句検証を追加しました。**
+  責務境界を「単一のDomainフィールドまたは単一オブジェクトのみから
+  判定でき、XML namespace contextや他オブジェクトとの関係を必要と
+  しない制約」と確定し、README.mdの「バリデーションの範囲」へXSD
+  built-in型ごとの責務表とともに反映、CONTRIBUTING.mdの該当節からも
+  参照するようにしました。あわせて以下のローカル字句検証を実装:
+  - `xs:ID`/`xs:IDREF`: NCName字句制約(`IdType`/`IdRefType`/
+    `IdRefListType`/`ContentIdRefListType`、および
+    `HasIdAttributeType.id`/`ContentBaseType.id`/`ref`)。文書内一意性・
+    参照先解決は引き続きPyMaiMLの責務。
+  - `xs:QName`: prefix:localの構文チェック(各部がNCName、コロンは
+    高々1つ)を`QualifiedNameType`/`QualifiedNameListType`/
+    `ContentQualifiedNameListType`へ追加。prefix→namespace URI解決は
+    引き続きPyMaiMLの責務(MaiML-Domainへnamespace管理を持ち込まない)。
+  - `xs:language`: XSD自体のパターンfacet(`[a-zA-Z]{1,8}(-[a-zA-Z0-9]
+    {1,8})*`)による構文チェックを`LanguageType`/`LanguageListType`/
+    `ContentLanguageListType`へ追加。実在する言語コードかの意味検証は
+    対象外。
+
+  各項目に対する正常系・異常系の回帰テストを`tests/test_property_
+  validation.py`へ25件追加しました。`xs:token`のwhiteSpace正規化と
+  `xs:anyURI`は、ポリシー文書の推奨どおり必要性を確認してから別途
+  検討する対象として今回は対応していません。
+
 ## [0.2.0] - 2026-09-08
 
 ### Added

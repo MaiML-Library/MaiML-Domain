@@ -22,7 +22,7 @@ from decimal import Decimal
 from typing import Any, List, Optional
 
 from .core import EncryptionType, _StrictAttributesMixin
-from .simple_types import UUID_PATTERN
+from .simple_types import UUID_PATTERN, NCNAME_PATTERN, LANGUAGE_TAG_PATTERN
 
 
 # ---------------------------------------------------------------------------
@@ -62,6 +62,41 @@ def _check_int_range(cls_name: str, value: int, range_: tuple, *, label: str = "
 def _check_uuid_lexical(cls_name: str, value: str, *, label: str = "value") -> None:
     if not UUID_PATTERN.match(value):
         raise ValueError(f"{cls_name}.{label} is not a valid MaiML UUID: {value!r}")
+
+
+def _check_ncname_lexical(cls_name: str, value: str, *, label: str = "value") -> None:
+    """xs:ID / xs:IDREF derive from xs:NCName -- see MaiML_Domain_XSD_builtin_
+    validation_policy.md sec.5/6: the lexical constraint itself is Domain's
+    responsibility; document-wide id uniqueness and ref-target resolution
+    stay with PyMaiML (pymaiml.validation)."""
+    if not NCNAME_PATTERN.match(value):
+        raise ValueError(f"{cls_name}.{label} is not a valid NCName (required by xs:ID/xs:IDREF): {value!r}")
+
+
+def _check_qname_lexical(cls_name: str, value: str, *, label: str = "value") -> None:
+    """xs:QName's own lexical/syntactic form ((prefix ':')? localPart, each
+    an NCName) is Domain's responsibility; resolving a prefix to a
+    namespace URI requires XML namespace context and stays with PyMaiML
+    (see MaiML_Domain_XSD_builtin_validation_policy.md sec.7)."""
+    parts = value.split(":")
+    if len(parts) == 1:
+        if not NCNAME_PATTERN.match(parts[0]):
+            raise ValueError(f"{cls_name}.{label} is not a valid QName (local part is not a valid NCName): {value!r}")
+    elif len(parts) == 2:
+        prefix, local = parts
+        if not NCNAME_PATTERN.match(prefix) or not NCNAME_PATTERN.match(local):
+            raise ValueError(f"{cls_name}.{label} is not a valid QName (prefix/local part is not a valid NCName): {value!r}")
+    else:
+        raise ValueError(f"{cls_name}.{label} is not a valid QName (must contain at most one ':'): {value!r}")
+
+
+def _check_language_lexical(cls_name: str, value: str, *, label: str = "value") -> None:
+    """xs:language's own pattern facet (RFC 3066-shaped tag syntax) is
+    Domain's responsibility; whether the tag is an actually-registered
+    language subtag is an external-registry lookup left to callers (see
+    MaiML_Domain_XSD_builtin_validation_policy.md sec.8)."""
+    if not LANGUAGE_TAG_PATTERN.match(value):
+        raise ValueError(f"{cls_name}.{label} is not a valid xs:language tag: {value!r}")
 
 
 def _check_decimal_finite(cls_name: str, value: Any, *, label: str = "value") -> None:
@@ -188,10 +223,14 @@ class ContentBaseType(UncertaintyBaseType, ABC):
         encryption: Optional[EncryptionType] = None,
     ):
         super().__init__(key, encryption=encryption)
-        if id is not None and id == "":
-            raise ValueError(f"{type(self).__name__}.id must not be empty (xs:ID)")
-        if ref is not None and ref == "":
-            raise ValueError(f"{type(self).__name__}.ref must not be empty (xs:IDREF)")
+        if id is not None:
+            if id == "":
+                raise ValueError(f"{type(self).__name__}.id must not be empty (xs:ID)")
+            _check_ncname_lexical(type(self).__name__, id, label="id")
+        if ref is not None:
+            if ref == "":
+                raise ValueError(f"{type(self).__name__}.ref must not be empty (xs:IDREF)")
+            _check_ncname_lexical(type(self).__name__, ref, label="ref")
         self.axis = axis
         self.size = size
         self.id = id
@@ -248,13 +287,22 @@ class IdType(_ScalarPropertyBase):
     """Property: xs:ID scalar (nillable)."""
     _value_types = (str,)
 
+    def _check_value_extra(self, value, *, label="value"):
+        _check_ncname_lexical(type(self).__name__, value, label=label)
+
 class IdRefType(_ScalarPropertyBase):
     """Property: xs:IDREF scalar (nillable)."""
     _value_types = (str,)
 
+    def _check_value_extra(self, value, *, label="value"):
+        _check_ncname_lexical(type(self).__name__, value, label=label)
+
 class QualifiedNameType(_ScalarPropertyBase):
     """Property: xs:QName scalar (nillable)."""
     _value_types = (str,)
+
+    def _check_value_extra(self, value, *, label="value"):
+        _check_qname_lexical(type(self).__name__, value, label=label)
 
 
 class DateTimeType(_ScalarPropertyBase):
@@ -407,6 +455,9 @@ class LanguageType(_ScalarPropertyBase):
     """Property: xs:language scalar (nillable)."""
     _value_types = (str,)
 
+    def _check_value_extra(self, value, *, label="value"):
+        _check_language_lexical(type(self).__name__, value, label=label)
+
 
 # ---------------------------------------------------------------------------
 # Property: list types
@@ -462,9 +513,15 @@ class IdRefListType(_PropertyListBase):
     """Property: list of xs:IDREF."""
     _value_types = (str,)
 
+    def _check_value_extra(self, value, *, label="value"):
+        _check_ncname_lexical(type(self).__name__, value, label=label)
+
 class QualifiedNameListType(_PropertyListBase):
     """Property: list of xs:QName."""
     _value_types = (str,)
+
+    def _check_value_extra(self, value, *, label="value"):
+        _check_qname_lexical(type(self).__name__, value, label=label)
 
 
 class DateTimeListType(_PropertyListBase):
@@ -611,6 +668,9 @@ class LanguageListType(_PropertyListBase):
     """Property: list of xs:language."""
     _value_types = (str,)
 
+    def _check_value_extra(self, value, *, label="value"):
+        _check_language_lexical(type(self).__name__, value, label=label)
+
 class StringEnumType(_PropertyListBase):
     """Property: enumeration of xs:string values."""
     _value_types = (str,)
@@ -662,9 +722,15 @@ class ContentIdRefListType(_ContentListBase):
     """Content: list of xs:IDREF."""
     _value_types = (str,)
 
+    def _check_value_extra(self, value, *, label="value"):
+        _check_ncname_lexical(type(self).__name__, value, label=label)
+
 class ContentQualifiedNameListType(_ContentListBase):
     """Content: list of xs:QName."""
     _value_types = (str,)
+
+    def _check_value_extra(self, value, *, label="value"):
+        _check_qname_lexical(type(self).__name__, value, label=label)
 
 
 class ContentDateTimeListType(_ContentListBase):
@@ -814,6 +880,9 @@ class ContentUuidListType(_ContentListBase):
 class ContentLanguageListType(_ContentListBase):
     """Content: list of xs:language."""
     _value_types = (str,)
+
+    def _check_value_extra(self, value, *, label="value"):
+        _check_language_lexical(type(self).__name__, value, label=label)
 
 class ContentStringEnumType(_ContentListBase):
     """Content: enumeration of xs:string values."""

@@ -233,3 +233,141 @@ def test_encryption_alone_is_allowed_on_content_list_type():
     obj = m.ContentStringListType(key="x", encryption=_encryption())
     assert obj.encryption is not None
     assert obj.values == []
+
+
+# ---------------------------------------------------------------------------
+# xs:ID / xs:IDREF: NCName lexical constraint
+# (MaiML_Domain_XSD_builtin_validation_policy.md sec.5/6 -- the lexical
+# check is Domain's job; document-wide id uniqueness and ref-target
+# resolution stay with PyMaiML.)
+# ---------------------------------------------------------------------------
+
+def test_id_type_rejects_non_ncname():
+    with pytest.raises(ValueError):
+        m.IdType(key="x", value="not a name")
+
+
+def test_id_type_rejects_leading_digit():
+    with pytest.raises(ValueError):
+        m.IdType(key="x", value="1bad")
+
+
+def test_id_type_rejects_colon():
+    with pytest.raises(ValueError):
+        m.IdType(key="x", value="has:colon")
+
+
+def test_id_type_accepts_valid_ncname():
+    assert m.IdType(key="x", value="vendor_1").value == "vendor_1"
+
+
+def test_id_ref_type_rejects_non_ncname():
+    with pytest.raises(ValueError):
+        m.IdRefType(key="x", value="not a name")
+
+
+def test_id_ref_list_type_rejects_non_ncname_element():
+    with pytest.raises(ValueError):
+        m.IdRefListType(key="x", values=["ok1", "not a name"])
+
+
+def test_content_id_ref_list_type_rejects_non_ncname_element():
+    with pytest.raises(ValueError):
+        m.ContentIdRefListType(key="x", values=["1bad"])
+
+
+def test_content_id_rejects_non_ncname():
+    with pytest.raises(ValueError):
+        m.ContentStringListType(key="x", id="1bad")
+
+
+def test_content_ref_rejects_non_ncname():
+    with pytest.raises(ValueError):
+        m.ContentStringListType(key="x", ref="has space")
+
+
+def test_content_id_accepts_valid_ncname():
+    assert m.ContentStringListType(key="x", id="c-1").id == "c-1"
+
+
+def test_has_id_attribute_type_rejects_non_ncname():
+    content = m.GlobalObjectContent(uuid=m.Uuid("12345678-1234-4234-8234-123456789012"))
+    with pytest.raises(ValueError):
+        m.VendorType(id="1bad", content=content)
+
+
+def test_has_id_attribute_type_accepts_valid_ncname():
+    content = m.GlobalObjectContent(uuid=m.Uuid("12345678-1234-4234-8234-123456789012"))
+    assert m.VendorType(id="vendor_1", content=content).id == "vendor_1"
+
+
+# ---------------------------------------------------------------------------
+# xs:QName: (prefix ':')? localPart, each an NCName. Prefix -> namespace URI
+# resolution is explicitly NOT Domain's job (sec.7 -- would require XML
+# namespace context).
+# ---------------------------------------------------------------------------
+
+def test_qualified_name_type_accepts_unprefixed_name():
+    assert m.QualifiedNameType(key="x", value="localname").value == "localname"
+
+
+def test_qualified_name_type_accepts_prefixed_name():
+    assert m.QualifiedNameType(key="x", value="ex:temperature").value == "ex:temperature"
+
+
+def test_qualified_name_type_rejects_multiple_colons():
+    with pytest.raises(ValueError):
+        m.QualifiedNameType(key="x", value="a:b:c")
+
+
+def test_qualified_name_type_rejects_invalid_local_part():
+    with pytest.raises(ValueError):
+        m.QualifiedNameType(key="x", value="ex:1bad")
+
+
+def test_qualified_name_type_rejects_invalid_prefix():
+    with pytest.raises(ValueError):
+        m.QualifiedNameType(key="x", value="1bad:local")
+
+
+def test_qualified_name_list_type_rejects_invalid_element():
+    with pytest.raises(ValueError):
+        m.QualifiedNameListType(key="x", values=["ex:ok", "ex:1bad"])
+
+
+def test_content_qualified_name_list_type_rejects_invalid_element():
+    with pytest.raises(ValueError):
+        m.ContentQualifiedNameListType(key="x", values=["a:b:c"])
+
+
+# ---------------------------------------------------------------------------
+# xs:language: XSD's own pattern facet (syntactic only -- no registry check,
+# per sec.8).
+# ---------------------------------------------------------------------------
+
+def test_language_type_accepts_simple_tag():
+    assert m.LanguageType(key="x", value="en").value == "en"
+
+
+def test_language_type_accepts_subtag():
+    assert m.LanguageType(key="x", value="en-US").value == "en-US"
+
+
+def test_language_type_rejects_digits_only():
+    with pytest.raises(ValueError):
+        m.LanguageType(key="x", value="123")
+
+
+def test_language_type_rejects_overlong_subtag():
+    with pytest.raises(ValueError):
+        m.LanguageType(key="x", value="en-toolongsubtag123")
+
+
+def test_language_list_type_rejects_invalid_element():
+    with pytest.raises(ValueError):
+        m.LanguageListType(key="x", values=["en", "123"])
+
+
+def test_content_language_list_type_rejects_invalid_element():
+    with pytest.raises(ValueError):
+        m.ContentLanguageListType(key="x", values=["not valid"])

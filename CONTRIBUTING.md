@@ -44,20 +44,28 @@ XSDファイル自体を同梱していません(XMLの読み書き・スキー�
    自動的に検出する仕組みになっているため、この規則さえ守れば追加の
    ボイラープレートは不要です。
 
-4. **コンストラクタでの検証は「単体のcomplexTypeだけで判断できる範囲」に
-   留める。** README.mdの「バリデーションの範囲」で説明している通り、
-   `minOccurs`/`maxOccurs`、`xs:choice`の排他性、required属性、
-   `simpleType`の字句上の制約など、**そのcomplexType定義だけを見れば
-   機械的に判断できる制約**はコンストラクタで検証し、違反時に
-   `ValueError`/`TypeError`を送出してください(既存の`HashType.value`が
-   `bytes`でなければ`TypeError`、`InsertionType.uri`が空文字なら
-   `ValueError`、といった例と同じパターンです)。逆に、`id`/`ref`の
-   整合性やイベントログの`lifecycle:transition="complete"`必須化のような
+4. **コンストラクタでの検証は「単一のDomainフィールドまたは単一オブジェクト
+   だけで判断できる範囲」に留める。**
+   `MaiML_Domain_XSD_builtin_validation_policy.md`で確定し、README.mdの
+   「バリデーションの範囲」に反映済みの方針です。`minOccurs`/`maxOccurs`、
+   `xs:choice`の排他性、required属性、`simpleType`の字句上の制約など、
+   **XML namespace contextや他オブジェクトとの関係を必要としない制約**は
+   コンストラクタで検証し、違反時に`ValueError`/`TypeError`を送出して
+   ください(既存の`HashType.value`が`bytes`でなければ`TypeError`、
+   `InsertionType.uri`が空文字なら`ValueError`、`xs:ID`/`xs:IDREF`の
+   NCName字句制約、`xs:QName`のprefix:local構文チェック、といった例と
+   同じパターンです)。新しいXSD built-in型に対応する際は、README.mdの
+   「XSD built-in型ごとの責務」表を先に確認し、その型がDomain側の責務か
+   PyMaiML側の責務かを表と照らして判断してください。
+
+   逆に、`id`/`ref`の文書内一意性・参照先解決、namespace prefixの
+   URI解決、イベントログの`lifecycle:transition="complete"`必須化のような
    **複数要素・複数セクションをまたいで初めて判断できる検証**は、
    意図的に本リポジトリの責務外としてください。これは
    [PyMaiML](https://github.com/MaiML-Library/PyMaiML)の
    `pymaiml.validation`が担う領域です。どちらに実装すべきか迷う場合は、
-   この基準(1つのcomplexType定義だけで判定できるか否か)で判断してください。
+   この基準(単一フィールド/単一オブジェクトだけで判定できるか否か)で
+   判断してください。
 
 5. **テストを追加する。** 新しいクラスの正常系(妥当な値でインスタンス
    化できる)・異常系(手順4で追加した検証が正しく`ValueError`/

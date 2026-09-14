@@ -61,26 +61,57 @@ MaiML-Library organization は次のような階層構造を基本方針とし�
 ## バリデーションの範囲
 
 本リポジトリは「純粋なデータモデル」を掲げていますが、完全に無検証というわけではありません。
-**XSD単体(1つのcomplexType定義)を見るだけで機械的に判断できる制約**のうち、
-Domainモデルで実装している型制約・値域制約・排他制約など
-(`minOccurs`/`maxOccurs`、`xs:choice`の排他性、required属性、`simpleType`のうち
-対応している字句・値域制約など)は各クラスのコンストラクタで検証し、違反時には
-`ValueError`/`TypeError`を送出します(例: `HasIdAttributeType.id`が空文字なら拒否、
-`GlobalObjectContent`で`encryption`と平文フィールドを同時に指定すると拒否、integer系の
-値域超過・UUID字句不正・xs:decimalの非有限値(NaN/Infinity)を拒否、など)。
+責務境界の基準は次の一文です(`MaiML_Domain_XSD_builtin_validation_policy.md`で確定した方針)。
 
-ただし`simpleType`の字句制約は全て網羅しているわけではありません。`xs:ID`/`xs:IDREF`
-(`IdType`/`IdRefType`等)のNCName字句制約、`xs:QName`(`QualifiedNameType`)、
-`xs:language`(`LanguageType`)などは、現状Pythonの`str`型であることの確認に留まり、
-XSD側の詳細な字句制約(NCNameの文字集合、BCP 47準拠など)までは検証していません。
-対応範囲を広げる場合は、既存の検証と独立した別Issueとして切り出すことを推奨します。
+> **MaiML-Domainは、単一のDomainフィールドまたは単一オブジェクトのみから判定でき、
+> XML namespace contextや他オブジェクトとの関係を必要としない制約を検証する。**
+> namespaceの解決、idの文書内一意性、IDREFの参照先解決、その他のオブジェクト間・
+> セクション間の整合性検証はPyMaiMLが担う。
+
+「単一フィールドのみ」ではなく「単一オブジェクト」まで含めているのは、`encryption`と
+平文フィールドの`xs:choice`排他検証のように、同一オブジェクト内の複数フィールドを
+見る必要はあるが文書全体のコンテキストは不要な検証を含めるためです。
+
+対象の具体例(`minOccurs`/`maxOccurs`、`xs:choice`の排他性、required属性、`simpleType`の
+うち対応している字句・値域制約など)は各クラスのコンストラクタで検証し、違反時には
+`ValueError`/`TypeError`を送出します(例: `HasIdAttributeType.id`が空文字またはNCNameとして
+不正なら拒否、`GlobalObjectContent`で`encryption`と平文フィールドを同時に指定すると拒否、
+integer系の値域超過・UUID字句不正・xs:decimalの非有限値(NaN/Infinity)を拒否、`xs:ID`/
+`xs:IDREF`のNCName字句制約、`xs:QName`のプレフィックス:ローカル名構文、`xs:language`の
+パターンなど)。
+
+もう一つの原則として、**MaiML-DomainはXML上の元の字句表現ではなく、XSDの値空間に対応する
+Python値を表現します**(例: `xs:dateTime` → `datetime`、`xs:decimal` → `Decimal`/`int`、
+`xs:base64Binary` → `bytes`)。したがって元XMLの文字列表現を完全に保存・再現することは
+目的としていません。
+
+### XSD built-in型ごとの責務
+
+| XSD型 | MaiML-Domain | PyMaiML / XML層 |
+|---|---|---|
+| `xs:string` / `xs:boolean` | Python型検証 | ― |
+| `xs:decimal` / integer系 | 型・値域・有限性検証 | ― |
+| `xs:ID` | NCName字句制約 | 文書内一意性 |
+| `xs:IDREF` | NCName字句制約 | 参照先の存在・型チェック |
+| `xs:QName` | QName字句・構文(prefix:localのNCName構成) | prefix → namespace URI解決 |
+| `xs:language` | XSDのパターン facet(構文) | 言語サブタグレジストリ等を使う意味検証 |
+| `xs:token` | 現状維持(下記参照) | whitespace正規化を別途検討 |
+| `xs:anyURI` | 過剰検証しない(下記参照) | 到達性・外部リソース確認等 |
+| `xs:dateTime` / `xs:base64Binary` / `xs:hexBinary` | Python型(`datetime`/`bytes`)への変換 | XML lexical formの処理 |
+
+`xs:token`のwhiteSpace collapseは「拒否のための検証」というより値の正規化であり、
+コンストラクタで入力値を暗黙に書き換えると「渡した値がそのまま保持される」という直感を
+崩しかねないため、現時点では積極的な正規化をDomainへ導入していません。`xs:anyURI`も
+`urn:example:data`や相対パスなど多様な形式を許容するため、HTTP(S)スキームや到達可能性を
+要求する専用バリデータとしては扱いません。いずれも必要性を確認したうえで別Issueとして
+検討する対象です。
 
 一方、**複数要素・複数セクションをまたいで初めて判断できる検証**(`id`/`ref`の整合性、
 `ref`参照先の型チェック、イベントログの`lifecycle:transition="complete"`必須化など
 JIS / MaiML AI Common Specificationの業務ルール)は、あえて本リポジトリの責務外としています。
 これらはSDK層([PyMaiML](https://github.com/MaiML-Library/PyMaiML)の`pymaiml.validation`)
-が担います。新しい検証ロジックをどちらに実装すべきか迷ったら、この基準(1つのcomplexType
-定義だけで判定できるか否か)に照らして判断してください。
+が担います。新しい検証ロジックをどちらに実装すべきか迷ったら、この基準(単一フィールド/
+単一オブジェクトだけで判定できるか否か)に照らして判断してください。
 
 ## コントリビューション
 

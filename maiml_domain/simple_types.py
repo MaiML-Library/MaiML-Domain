@@ -10,6 +10,30 @@ UUID_PATTERN = re.compile(
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[3-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
 )
 
+
+# --- NCName (XML 1.0 sec. 2.3 / Namespaces in XML sec. 3) ---
+# xs:ID / xs:IDREF derive from xs:NCName. This pattern covers the Basic
+# Multilingual Plane NameStartChar/NameChar ranges from the XML Name
+# production; it does not special-case the astral-plane range
+# #x10000-#xEFFFF (irrelevant for MaiML's ASCII-oriented id/ref values in
+# practice, and awkward to express as a plain `re` character class).
+_NC_NAME_START_CHARS = (
+    r"A-Za-z_"
+    r"\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF"
+    r"\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD"
+)
+_NC_NAME_CHAR_EXTRA = r"0-9\u00B7\u0300-\u036F\u203F-\u2040.\-"
+NCNAME_PATTERN = re.compile(
+    "^[" + _NC_NAME_START_CHARS + "][" + _NC_NAME_START_CHARS + _NC_NAME_CHAR_EXTRA + "]*$"
+)
+
+# --- xs:language (W3C XML Schema builtin type's own pattern facet) ---
+# This is the literal facet the XSD spec itself uses to constrain
+# xs:language -- syntactic (RFC 3066-shaped tag), not a check against an
+# actual language-subtag registry (deliberately out of Domain's scope, see
+# README.md's "バリデーションの範囲").
+LANGUAGE_TAG_PATTERN = re.compile(r'^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$')
+
 class Uuid(str):
     """UUID string restricted to versions 3, 4, 5 (RFC 4122)."""
 
@@ -95,4 +119,5 @@ class DateTimeFormatString(str):
 __all__ = [
     "Uuid", "IsoLanguageName", "DecimalFormatString",
     "FloatFormatString", "IntegerFormatString", "DateTimeFormatString",
+    "NCNAME_PATTERN", "LANGUAGE_TAG_PATTERN",
 ]
