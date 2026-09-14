@@ -61,17 +61,26 @@ MaiML-Library organization は次のような階層構造を基本方針とし�
 ## バリデーションの範囲
 
 本リポジトリは「純粋なデータモデル」を掲げていますが、完全に無検証というわけではありません。
-**XSD単体(1つのcomplexType定義)を見るだけで機械的に判断できる制約**
-(`minOccurs`/`maxOccurs`、`xs:choice`の排他性、required属性、`simpleType`の字句上の制約など)は
-各クラスのコンストラクタで検証し、違反時には`ValueError`/`TypeError`を送出します
-(例: `HasIdAttributeType.id`が空文字なら拒否、`GlobalObjectContent`で`encryption`と
-平文フィールドを同時に指定すると拒否、など)。一方、**複数要素・複数セクションをまたいで
-初めて判断できる検証**(`id`/`ref`の整合性、`ref`参照先の型チェック、イベントログの
-`lifecycle:transition="complete"`必須化などJIS / MaiML AI Common Specificationの業務ルール)は、
-あえて本リポジトリの責務外としています。これらはSDK層
-([PyMaiML](https://github.com/MaiML-Library/PyMaiML)の`pymaiml.validation`)が担います。
-新しい検証ロジックをどちらに実装すべきか迷ったら、この基準(1つのcomplexType定義だけで
-判定できるか否か)に照らして判断してください。
+**XSD単体(1つのcomplexType定義)を見るだけで機械的に判断できる制約**のうち、
+Domainモデルで実装している型制約・値域制約・排他制約など
+(`minOccurs`/`maxOccurs`、`xs:choice`の排他性、required属性、`simpleType`のうち
+対応している字句・値域制約など)は各クラスのコンストラクタで検証し、違反時には
+`ValueError`/`TypeError`を送出します(例: `HasIdAttributeType.id`が空文字なら拒否、
+`GlobalObjectContent`で`encryption`と平文フィールドを同時に指定すると拒否、integer系の
+値域超過・UUID字句不正・xs:decimalの非有限値(NaN/Infinity)を拒否、など)。
+
+ただし`simpleType`の字句制約は全て網羅しているわけではありません。`xs:ID`/`xs:IDREF`
+(`IdType`/`IdRefType`等)のNCName字句制約、`xs:QName`(`QualifiedNameType`)、
+`xs:language`(`LanguageType`)などは、現状Pythonの`str`型であることの確認に留まり、
+XSD側の詳細な字句制約(NCNameの文字集合、BCP 47準拠など)までは検証していません。
+対応範囲を広げる場合は、既存の検証と独立した別Issueとして切り出すことを推奨します。
+
+一方、**複数要素・複数セクションをまたいで初めて判断できる検証**(`id`/`ref`の整合性、
+`ref`参照先の型チェック、イベントログの`lifecycle:transition="complete"`必須化など
+JIS / MaiML AI Common Specificationの業務ルール)は、あえて本リポジトリの責務外としています。
+これらはSDK層([PyMaiML](https://github.com/MaiML-Library/PyMaiML)の`pymaiml.validation`)
+が担います。新しい検証ロジックをどちらに実装すべきか迷ったら、この基準(1つのcomplexType
+定義だけで判定できるか否か)に照らして判断してください。
 
 ## コントリビューション
 

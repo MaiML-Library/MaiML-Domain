@@ -64,6 +64,17 @@ def _check_uuid_lexical(cls_name: str, value: str, *, label: str = "value") -> N
         raise ValueError(f"{cls_name}.{label} is not a valid MaiML UUID: {value!r}")
 
 
+def _check_decimal_finite(cls_name: str, value: Any, *, label: str = "value") -> None:
+    """xs:decimal's value space (unlike xs:float/xs:double) does not include
+    NaN, INF or -INF -- only Decimal instances are checked here since a plain
+    int (also accepted by DecimalType/-ListType) is always finite."""
+    if isinstance(value, Decimal) and not value.is_finite():
+        raise ValueError(
+            f"{cls_name}.{label} must be finite for xs:decimal (NaN/Infinity/"
+            f"-Infinity are not part of xs:decimal's value space): {value!r}"
+        )
+
+
 def _check_list_element_types(cls_name: str, items: list, expected_type: type, label: str) -> None:
     """properties/contents/uncertainties: each element must be an instance
     of expected_type (PropertyBaseType/ContentBaseType/UncertaintyBaseType
@@ -291,6 +302,9 @@ class DecimalType(_NumericScalarPropertyBase):
     _value_types = (Decimal, int)
     _reject_bool = True
 
+    def _check_value_extra(self, value, *, label="value"):
+        _check_decimal_finite(type(self).__name__, value, label=label)
+
 class DoubleType(_NumericScalarPropertyBase):
     """Property: xs:double scalar. Optional formatString, units, scaleFactor."""
     _value_types = (float, int)
@@ -492,6 +506,9 @@ class DecimalListType(_NumericListProperty):
     _value_types = (Decimal, int)
     _reject_bool = True
 
+    def _check_value_extra(self, value, *, label="value"):
+        _check_decimal_finite(type(self).__name__, value, label=label)
+
 class DoubleListType(_NumericListProperty):
     """Property: list of xs:double."""
     _value_types = (float, int)
@@ -692,6 +709,9 @@ class ContentDecimalListType(_NumericContentList):
     """Content: list of xs:decimal."""
     _value_types = (Decimal, int)
     _reject_bool = True
+
+    def _check_value_extra(self, value, *, label="value"):
+        _check_decimal_finite(type(self).__name__, value, label=label)
 
 class ContentDoubleListType(_NumericContentList):
     """Content: list of xs:double."""

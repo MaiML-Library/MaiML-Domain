@@ -93,6 +93,30 @@ SemVerに従い、破壊的変更は `x`(メジャー)、機能追加は `y`(マ
   (誤:「リスト型(property/content)各24種」)を実際の内訳
   (property側23種・content側22種)に修正しました。
 
+- **`MaiML_Domain_new_required_fixes.md`(前回修正のレビュー)で指摘
+  された、`DecimalType`/`DecimalListType`/`ContentDecimalListType`が
+  非有限値を拒否しない問題を修正しました。** 【高】`xs:decimal`は
+  `xs:float`/`xs:double`と異なりNaN/Infinity/-Infinityを値空間に含まない
+  ため、`Decimal("NaN")`のような値は本来Domainオブジェクトとして構築
+  できてはならない。`_check_value_extra()`に`Decimal.is_finite()`に
+  よるチェックを追加した(`int`は常に有限なので対象外)。
+- **前回修正で追加した検証(スカラー`value`の型検証、integer系値域検証、
+  UUID字句検証、`properties`/`contents`/`uncertainties`要素型検証、
+  `ContentBaseType.id`/`ref`空文字拒否、encryption/平文排他チェック)に
+  対する専用回帰テストを追加しました。** 【高】これまでは
+  `tests/build_sample_maiml.py`による正常系の疎通確認のみで、上記の
+  検証ロジックを直接固定するテストが無く、将来の`property.py`
+  リファクタリングで検証が意図せず失われても気付けない状態だった。
+  `tests/test_property_validation.py`(新規)へ33件のテストを追加
+  (本項目のDecimal非有限値チェックを含む)。
+- **README.mdの「バリデーションの範囲」の記載を、現在の実装範囲に
+  合わせて調整しました。** 【中〜低】旧文言は「`simpleType`の字句上の
+  制約など」を検証すると読め、全simpleTypeの字句制約を完全に保証して
+  いるように誤解されかねなかった。実際には`xs:ID`/`xs:IDREF`の
+  NCName字句制約・`xs:QName`・`xs:language`などはPython型の確認に
+  留まっている旨を明記し、対応範囲を広げる場合は別Issueとして切り出す
+  ことを推奨する一文を追加した。
+
 ## [0.2.0] - 2026-09-08
 
 ### Added
