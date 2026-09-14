@@ -54,6 +54,45 @@ SemVerに従い、破壊的変更は `x`(メジャー)、機能追加は `y`(マ
   しています(詳細はPyMaiML側のCONTRIBUTING.mdを参照)。コード変更は
   ありません。
 
+- **外部レビュー(`MaiML_Domain_PyMaiML_required_fixes.md`)で指摘された、
+  `property.py`のスカラー`value`/リスト`values`要素に対する字句検証の
+  欠落を修正しました。** 【高】`IntType(value="not-an-int")`や
+  `BooleanType(value="yes")`のような型不正な値が、これまでは無検証で
+  構築できてしまっていました。各スカラー/リスト型に`_value_types`
+  (許容するPython型)を宣言する仕組みを追加し、UncertaintyBaseTypeの
+  `_check_value()`で一括検証するようにしました。整数系(`IntType`/
+  `LongType`/`ShortType`/`ByteType`/`UnsignedInt`/`UnsignedLong`/
+  `UnsignedShort`/`UnsignedByteType`)は`bool`を明示的に拒否した上で
+  xs:byte〜xs:unsignedLongそれぞれのXSD字句範囲(例:
+  xs:byte は -128〜127)も検証します。`UuidType`はUUIDの正規表現パターン
+  (`simple_types.UUID_PATTERN`)も検証します。`DecimalType`は`Decimal`と
+  `int`(xs:decimalの字句空間に整数も含まれるため)を受け付けます。
+- **同レビューで指摘された、`properties`/`contents`/`uncertainties`
+  リスト属性の要素型検証の欠落も修正しました。** 【高】
+  `properties=[object()]`のような不正な要素を含むリストが、これまでは
+  無検証で構築できてしまっていました。`maiml-property.xsd`の
+  `property`/`content`/`uncertainty`要素の型宣言
+  (`propertyBaseType`/`contentBaseType`/`uncertaintyBaseType`)どおりに、
+  各要素が`PropertyBaseType`/`ContentBaseType`/`UncertaintyBaseType`の
+  インスタンスであることを構築時に検証する`_check_list_element_types()`
+  を追加し、`_ScalarPropertyBase`/`_PropertyListBase`/`_ContentListBase`
+  の3箇所から呼び出しています。
+- **`ContentBaseType.id`/`ref`の空文字許容を、`HasIdAttributeType.id`と
+  同じ拒否に統一しました。** 【中】どちらも`maiml-property.xsd`/
+  `maiml-helper.xsd`上は`xs:ID`/`xs:IDREF`(xs:NCName由来、空文字を
+  許容しない)ですが、`ContentBaseType`側だけ検証が抜けていました。
+- **`property.py`の3箇所(`_ScalarPropertyBase`/`_PropertyListBase`/
+  `_ContentListBase`)に重複していた`encryption`と平文フィールドの
+  排他チェックを、共通ヘルパー`_check_encryption_exclusive()`へ
+  抽出しました。** 【中】保守性向上のリファクタリングで、挙動は
+  変わりません。
+- **README.md / `maiml_domain/README.md`を現行実装に合わせて更新しました。**
+  【低】`simple_types.py`のクラス一覧に`DateTimeFormatString`が、
+  `core.py`のクラス一覧に`EncryptionType`が、それぞれ抜けていたのを
+  追加しました。`property.py`のリスト型数の記載
+  (誤:「リスト型(property/content)各24種」)を実際の内訳
+  (property側23種・content側22種)に修正しました。
+
 ## [0.2.0] - 2026-09-08
 
 ### Added

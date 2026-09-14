@@ -31,9 +31,11 @@
   `simple_types.py`      `maiml-simpleTypes.xsd`   Uuid, IsoLanguageName,
                                                    DecimalFormatString,
                                                    FloatFormatString,
-                                                   IntegerFormatString
+                                                   IntegerFormatString,
+                                                   DateTimeFormatString
 
   `core.py`              `maiml-core.xsd`          HashType, InsertionType,
+                                                   EncryptionType,
                                                    HasIdAttributeType,
                                                    GlobalObjectContent,
                                                    SimpleObjectType,
@@ -43,7 +45,8 @@
   `property.py`          `maiml-property.xsd`      UncertaintyBaseType,
                                                    PropertyBaseType, ContentBaseType +
                                                    スカラー型23種 +
-                                                   リスト型（property/content）各24種
+                                                   propertyリスト型23種 +
+                                                   contentリスト型22種
 
   `ref_types.py`         `maiml-refTypes.xsd`      CreatorRefType, VendorRefType,
                                                    OwnerRefType, InstrumentRefType,

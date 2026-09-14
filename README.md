@@ -12,8 +12,8 @@ MaiML(JIS K 0200 / MaiML-Schema-1_0)の XSD 定義に対応した Python ドメ�
 - MaiML の各 XSD(`maiml-core.xsd` / `maiml-property.xsd` / `maiml-document.xsd` / `maiml-protocol.xsd` /
   `maiml-data.xsd` / `maiml-eventLog.xsd` / `maiml-pnml.xsd` / `maiml-refTypes.xsd` / `maiml-simpleTypes.xsd` /
   `maiml.xsd`)に 1:1 で対応したドメインクラスを提供します。
-- property/content 型はスカラー型 23 種・リスト型 23 種(base 含む)・コンテンツリスト型 22 種を完全に網羅しています。
-- 暗号化されたプロパティ/コンテンツ(`encryptionGroup`)にも対応しています。
+- property/content 型はスカラー型 23 種・property 側リスト型 23 種(`PropertyListType` 含む)・content 側リスト型 22 種を完全に網羅しています。
+- 暗号化されたプロパティ/コンテンツ(`encryptionGroup`)用の `EncryptionType` にも対応しています(平文フィールドとの排他はコンストラクタで検証します)。
 - 依存ライブラリなし(Python 標準ライブラリのみ)。
 
 ## インストール
