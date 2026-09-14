@@ -30,6 +30,8 @@ SemVerに従い、破壊的変更は `x`(メジャー)、機能追加は `y`(マ
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-14
+
 - **`CONTRIBUTING.md`を追加しました。** [PyMaiML](https://github.com/MaiML-Library/PyMaiML)の
   `CONTRIBUTING.md`を土台に、本リポジトリの実際の性質(XSDを同梱しない、
   シリアライズ処理を持たない、実行時依存パッケージがゼロ)に合わせて
@@ -159,6 +161,12 @@ SemVerに従い、破壊的変更は `x`(メジャー)、機能追加は `y`(マ
 
   上記2点の正常系・異常系回帰テストを`tests/test_property_validation.py`
   へ13件追加しました(計82件)。
+
+- **README.mdの「MaiML-Libraryにおける位置づけ」節の記載を更新しました。**
+  MaiML-DomainとPyMaiMLそれぞれの役割を一文で説明する紹介文
+  (「JIS K 0200 / MaiML XSDに対応する、言語SDK共通のドメインモデル。
+  MaiMLの構造・型・ローカル制約を表現する。」など)を箇条書きの冒頭に
+  追加しました。コード変更はありません。
 
 ## [0.2.0] - 2026-09-08
 
