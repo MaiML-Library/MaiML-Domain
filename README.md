@@ -78,7 +78,8 @@ MaiML-Library organization は次のような階層構造を基本方針とし�
 不正なら拒否、`GlobalObjectContent`で`encryption`と平文フィールドを同時に指定すると拒否、
 integer系の値域超過・UUID字句不正・xs:decimalの非有限値(NaN/Infinity)を拒否、`xs:ID`/
 `xs:IDREF`のNCName字句制約、`xs:QName`のプレフィックス:ローカル名構文、`xs:language`の
-パターンなど)。
+パターンなど)。`xs:QName`の字句検証は`QualifiedNameType`だけでなく、全property/content
+共通の`UncertaintyBaseType.key`属性(これ自体もxs:QName)にも適用しています。
 
 もう一つの原則として、**MaiML-DomainはXML上の元の字句表現ではなく、XSDの値空間に対応する
 Python値を表現します**(例: `xs:dateTime` → `datetime`、`xs:decimal` → `Decimal`/`int`、

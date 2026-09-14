@@ -143,6 +143,23 @@ SemVerに従い、破壊的変更は `x`(メジャー)、機能追加は `y`(マ
   `xs:anyURI`は、ポリシー文書の推奨どおり必要性を確認してから別途
   検討する対象として今回は対応していません。
 
+- **`MaiML_Domain_XSD_builtin_validation_review_followup.md`(前回対応の
+  レビュー)で指摘された2点に対応しました。**
+  - 【HIGH】`UncertaintyBaseType.key`(全property/content共通のxs:QName
+    属性)に`_check_qname_lexical()`を適用しました。これまでは空文字
+    チェックのみで、`m.StringType(key="a:b:c", value="x")`のような
+    不正なQNameをkeyへ指定できてしまっていました。prefixが実際に
+    namespace URIへ解決できるかは引き続きPyMaiMLの責務のままです。
+  - 【MEDIUM】`NCNAME_PATTERN`をXML NameStartChar/NameChar productionの
+    astral-plane範囲(`#x10000-#xEFFFF`)まで完全対応させました。
+    Pythonの`str`/`re`は元々Unicodeコードポイント単位で動作するため、
+    文字クラスに`\U0001xxxx`形式の範囲を追加するだけで特別な処理は
+    不要でした(従来のコメントにあった「実装が煩雑」という判断は
+    誤りだったため修正しています)。
+
+  上記2点の正常系・異常系回帰テストを`tests/test_property_validation.py`
+  へ13件追加しました(計82件)。
+
 ## [0.2.0] - 2026-09-08
 
 ### Added

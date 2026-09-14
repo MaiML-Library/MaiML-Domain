@@ -163,6 +163,7 @@ class UncertaintyBaseType(_StrictAttributesMixin, ABC):
     def __init__(self, key: str, encryption: Optional[EncryptionType] = None):
         if not key:
             raise ValueError("key must not be empty")
+        _check_qname_lexical(type(self).__name__, key, label="key")
         self.key: str = key
         self.encryption: Optional[EncryptionType] = encryption
 

@@ -371,3 +371,83 @@ def test_language_list_type_rejects_invalid_element():
 def test_content_language_list_type_rejects_invalid_element():
     with pytest.raises(ValueError):
         m.ContentLanguageListType(key="x", values=["not valid"])
+
+
+# ---------------------------------------------------------------------------
+# UncertaintyBaseType.key: xs:QName lexical check
+# (MaiML_Domain_XSD_builtin_validation_review_followup.md item 1 -- `key`
+# is xs:QName just like QualifiedNameType's `value`, and is checkable from
+# a single field, so the same _check_qname_lexical() applies here too.
+# prefix -> namespace URI resolution stays with PyMaiML.)
+# ---------------------------------------------------------------------------
+
+def test_key_rejects_multiple_colons():
+    with pytest.raises(ValueError):
+        m.StringType(key="a:b:c", value="x")
+
+
+def test_key_rejects_leading_digit():
+    with pytest.raises(ValueError):
+        m.IntType(key="1bad", value=1)
+
+
+def test_key_rejects_whitespace():
+    with pytest.raises(ValueError):
+        m.StringType(key="has space", value="x")
+
+
+def test_key_accepts_unprefixed_name():
+    assert m.StringType(key="name", value="x").key == "name"
+
+
+def test_key_accepts_prefixed_name():
+    assert m.StringType(key="ex:name", value="x").key == "ex:name"
+
+
+# ---------------------------------------------------------------------------
+# NCNAME_PATTERN: astral-plane coverage
+# (MaiML_Domain_XSD_builtin_validation_review_followup.md item 2 -- Python's
+# str/re already operate on Unicode code points, so the astral-plane range
+# #x10000-#xEFFFF from the XML NameStartChar production needs no special
+# handling beyond including it in the character class.)
+# ---------------------------------------------------------------------------
+
+def test_ncname_pattern_accepts_ascii_name():
+    from maiml_domain.simple_types import NCNAME_PATTERN
+    assert NCNAME_PATTERN.match("vendor1")
+
+
+def test_ncname_pattern_accepts_bmp_unicode_name():
+    from maiml_domain.simple_types import NCNAME_PATTERN
+    assert NCNAME_PATTERN.match("kéy")  # 'kéy'
+
+
+def test_ncname_pattern_accepts_astral_plane_start_char():
+    from maiml_domain.simple_types import NCNAME_PATTERN
+    # U+20000 is within #x10000-#xEFFFF (CJK Unified Ideographs Extension B)
+    assert NCNAME_PATTERN.match("\U00020000abc")
+
+
+def test_id_type_accepts_astral_plane_ncname():
+    # End-to-end through IdType, not just the raw pattern.
+    assert m.IdType(key="x", value="\U00020000abc").value == "\U00020000abc"
+
+
+def test_ncname_pattern_rejects_leading_digit():
+    from maiml_domain.simple_types import NCNAME_PATTERN
+    assert not NCNAME_PATTERN.match("1bad")
+
+
+def test_ncname_pattern_rejects_colon():
+    from maiml_domain.simple_types import NCNAME_PATTERN
+    assert not NCNAME_PATTERN.match("has:colon")
+
+
+def test_ncname_pattern_rejects_whitespace():
+    from maiml_domain.simple_types import NCNAME_PATTERN
+    assert not NCNAME_PATTERN.match("has space")
+
+
+def test_ncname_pattern_rejects_invalid_start_char():
+    from maiml_domain.simple_types import NCNAME_PATTERN
+    assert not NCNAME_PATTERN.match("-bad")
