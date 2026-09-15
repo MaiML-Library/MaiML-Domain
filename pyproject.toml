@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "maiml-domain"
-version = "0.3.0"
+version = "1.0.0"
 description = "Python domain model for MaiML (JIS K 0200 / MaiML-Schema-1_0) -- one class per XSD-defined type, the shared foundation MaiML-Library language SDKs build on."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["maiml", "jis-k-0200", "xml", "domain-model", "measurement", "analysis-instrument"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",

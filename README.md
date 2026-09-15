@@ -92,6 +92,11 @@ Python値を表現します**(例: `xs:dateTime` → `datetime`、`xs:decimal` �
 `xs:base64Binary` → `bytes`)。したがって元XMLの文字列表現を完全に保存・再現することは
 目的としていません。
 
+`1.0.0`以降、この節に記載した検証・型変換の挙動はSemVer互換性保証の対象になります。
+対象範囲の詳細(クラスのコンストラクタ引数・公開属性・例外の型が対象、例外メッセージの
+文言や内部ヘルパー関数は対象外、など)は
+CONTRIBUTING.mdの「公開APIの範囲(`1.0.0`のSemVer保証対象)」節を参照してください。
+
 ### XSD built-in型ごとの責務
 
 | XSD型 | MaiML-Domain | PyMaiML / XML層 |
